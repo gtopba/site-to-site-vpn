@@ -27,7 +27,7 @@ Devices on each network do not need to be aware of the VPN; they simply send tra
 5. In this example, my local network subnet is 192.168.0.0/24
    
 ### remote site
-1. Rpi 3 B+ running 64bit PiOS lite
+1. Rpi 3 B+ running 64bit PiOS lite [install](https://www.tomshardware.com/reviews/raspberry-pi-headless-setup-how-to,6028.html)
 2. Router 192.168.2.1
    
 ## :lollipop: WireGuard VPN Setup and Maintenance
