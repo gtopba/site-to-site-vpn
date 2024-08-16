@@ -46,28 +46,27 @@ Install additional tools (optional but recommended):
 ```
 sudo apt-get install wireguard-tools
 ```
-2. Generate WireGuard Keys on Raspberry Pi
+### 2. Generate WireGuard Keys on Raspberry Pi
 Generate the private key:
-sh
-Copy code
+```
 wg genkey | sudo tee /etc/wireguard/private.key
+```
 Generate the public key from the private key:
-sh
-Copy code
+```
 sudo cat /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key
+```
 Display the keys:
-sh
-Copy code
+```
 sudo cat /etc/wireguard/private.key
 sudo cat /etc/wireguard/public.key
-3. Set Up the WireGuard Client Configuration File on Raspberry Pi
+```
+### 3. Set Up the WireGuard Client Configuration File on Raspberry Pi
 Create the configuration file:
-sh
-Copy code
+```
 sudo nano /etc/wireguard/wg0.conf
+```
 Add the following configuration to the file:
-ini
-Copy code
+```
 [Interface]
 PrivateKey = <client_private_key>
 Address = 10.63.31.2/24
@@ -79,44 +78,44 @@ PresharedKey = <preshared_key>
 Endpoint = warut.duckdns.org:51820
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
+```
 Save and exit:
 Press Ctrl+X to exit.
 Press Y to save the changes.
 Press Enter to confirm the file name.
-4. Enable IP Forwarding and Set Up NAT (Network Address Translation)
+### 4. Enable IP Forwarding and Set Up NAT (Network Address Translation)
 Enable IP forwarding:
-sh
-Copy code
+```
 echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
+```
 Set up iptables rules:
-sh
-Copy code
+```
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 sudo iptables -A FORWARD -i wg0 -j ACCEPT
 sudo iptables -A FORWARD -o wg0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+```
 Make iptables rules persistent:
-sh
-Copy code
+```
 sudo apt-get install iptables-persistent
 sudo sh -c "iptables-save > /etc/iptables/rules.v4"
-5. Start and Enable WireGuard
+```
+### 5. Start and Enable WireGuard
 Start the WireGuard interface:
-sh
-Copy code
+```
 sudo wg-quick up wg0
+```
 Enable WireGuard to start on boot:
-sh
-Copy code
+```
 sudo systemctl enable wg-quick@wg0
-6. Set Up a Cron Job to Check and Restart VPN Connection Every 5 Minutes
+```
+### 6. Set Up a Cron Job to Check and Restart VPN Connection Every 5 Minutes
 Create the check script:
-sh
-Copy code
+```
 sudo nano /usr/local/bin/check_wireguard.sh
+```
 Add the following script:
-sh
-Copy code
+```
 #!/bin/bash
 
 # Check if WireGuard is active
@@ -125,27 +124,30 @@ if ! sudo wg show wg0 | grep -q 'latest handshake'; then
     sudo wg-quick down wg0
     sudo wg-quick up wg0
 fi
+```
 Save and exit:
 Press Ctrl+X to exit.
 Press Y to save the changes.
 Press Enter to confirm the file name.
+
 Make the script executable:
-sh
-Copy code
+```
 sudo chmod +x /usr/local/bin/check_wireguard.sh
+```
 Edit the cron job:
-sh
-Copy code
+```
 sudo crontab -e
+```
 Add the following line to run every 5 minutes:
-sh
-Copy code
+```
 */5 * * * * /usr/local/bin/check_wireguard.sh
+```
 Save and exit:
 Press Ctrl+X to exit.
 Press Y to save the changes.
 Press Enter to confirm the file name.
-Security Recommendations
+
+## Security Recommendations
 Use Strong Authentication: Ensure strong, unique private and public keys for authentication.
 Regularly Update Software: Keep WireGuard and all related software up to date.
 Proper Firewall Configuration: Use iptables or ufw to manage firewall rules on the VPN server.
