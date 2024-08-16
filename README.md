@@ -111,11 +111,15 @@ Add the following script:
 ```
 #!/bin/bash
 
-# Check if WireGuard is active
-if ! sudo wg show wg0 | grep -q 'latest handshake'; then
-    # Restart WireGuard if it's not active
+# Ping a known reachable address through the VPN
+PING_ADDRESS="10.63.31.1" # Change this to an address that should be reachable through the VPN
+
+if ! ping -c 1 -W 1 $PING_ADDRESS > /dev/null; then
+    echo "$(date): Ping to $PING_ADDRESS failed. Restarting WireGuard." >> /var/log/wireguard-check.log
     sudo wg-quick down wg0
     sudo wg-quick up wg0
+else
+    echo "$(date): Ping to $PING_ADDRESS succeeded." >> /var/log/wireguard-check.log
 fi
 ```
 Save and exit:
@@ -139,6 +143,11 @@ Save and exit:
 Press Ctrl+X to exit.
 Press Y to save the changes.
 Press Enter to confirm the file name.
+
+## Router configurations
+### 1. Gateway 
+
+### 2. Static route
 
 ## Security Recommendations
 Use Strong Authentication: Ensure strong, unique private and public keys for authentication.
