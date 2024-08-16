@@ -20,7 +20,7 @@ Devices on each network do not need to be aware of the VPN; they simply send tra
 1. WireGuard server running on proxmox [install](https://tteck.github.io/Proxmox/#wireguard-lxc)
 2. Set static ip for WireGuard server.
 3. Forward port 51820
-4. Setup DDNS url for (for dynamic ip home internet) in the config file, add your url at pivpnHOST=[ddns url]
+4. Setup DDNS url (for dynamic ip home internet) in the WireGuard server's config file, add your url at pivpnHOST=[ddns url]
    ```
    nano /etc/pivpn/wireguard/setupVars.conf
    ```
@@ -46,20 +46,13 @@ Install additional tools (optional but recommended):
 ```
 sudo apt-get install wireguard-tools
 ```
-### 2. Generate WireGuard Keys on Raspberry Pi
+### 2. On WireGuard server, add client
 Generate the private key:
 ```
-wg genkey | sudo tee /etc/wireguard/private.key
+pivpn add
 ```
-Generate the public key from the private key:
-```
-sudo cat /etc/wireguard/private.key | wg pubkey | sudo tee /etc/wireguard/public.key
-```
-Display the keys:
-```
-sudo cat /etc/wireguard/private.key
-sudo cat /etc/wireguard/public.key
-```
+Copy the generated client file to client device
+
 ### 3. Set Up the WireGuard Client Configuration File on Raspberry Pi
 Create the configuration file:
 ```
