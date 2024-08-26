@@ -149,6 +149,109 @@ Press Enter to confirm the file name.
 
 ### 2. Static route
 
+## Troubleshooting
+### 1. Check the  server configuration file:
+``` 
+sudo nano /etc/wireguard/wg0.conf
+```
+Ensure the file has the correct settings. Noted that 192.168.1.0/12 is the network of my remote site.
+```
+[Interface]
+PrivateKey = <server_private_key>
+Address = 10.63.31.1/24
+ListenPort = 51820
+DNS = 8.8.8.8
+
+[Peer]
+PublicKey = <client_public_key>
+PresharedKey = <preshared_key>
+AllowedIPs = 10.63.31.2/32, 192.168.1.0/24
+PersistentKeepalive = 25
+```
+### 2. Check the Client Configuration File on Raspberry Pi
+```
+sudo nano /etc/wireguard/wg0.conf
+```
+```
+[Interface]
+PrivateKey = <client_private_key>
+Address = 10.63.31.2/24
+DNS = 8.8.8.8
+
+[Peer]
+PublicKey = <server_public_key>
+PresharedKey = <preshared_key>
+Endpoint = <ddns_url>:51820
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
+```
+### 3. Verify IP Forwarding and NAT
+Ensure the output is net.ipv4.ip_forward = 1. If not, enable it:
+```
+sudo sysctl net.ipv4.ip_forward
+```
+#### Check iptables Rules:
+Ensure you have the correct iptables rules set for NAT and forwarding:
+```
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -A FORWARD -i wg0 -j ACCEPT
+sudo iptables -A FORWARD -o wg0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+```
+## 4. Verify Routing
+On the WireGuard Server:
+```
+ip route
+```
+You should see routes for:
+
+VPN network (10.63.31.0/24)
+Remote site network (192.168.1.0/24)
+Local network (192.168.0.0/24)
+
+## 5. Test Network Connectivity
+From Local PC:
+1. Ping the Remote site router:
+```
+ping 192.168.1.1
+```
+2. Ping the Remote site Raspberry Pi: 
+```
+ping 192.168.1.100
+```
+From the Raspberry Pi at the Remote Site:
+1. Ping the local site router:
+```
+ping 192.168.0.1
+```
+
+## 6. Check Firewall Rules
+Ensure there are no firewall rules blocking the traffic.
+On the Raspberry Pi:
+```
+sudo iptables -L -v
+```
+Ensure there are no rules blocking traffic between the VPN and the Northern site network.
+
+## 7. Capture and Analyze Network Traffic
+If the above steps do not resolve the issue, use tcpdump or Wireshark to capture and analyze the network traffic.
+
+On the Raspberry Pi at the Remote Site:
+1. Install tcpdump (if not already installed):
+```
+sudo apt-get install tcpdump
+```
+2. Capture Traffic on wg0:
+```
+sudo tcpdump -i wg0
+```
+3. Capture Traffic on eth0:
+```
+sudo tcpdump -i eth0
+```
+Analyze the traffic to see if ping requests are reaching the Raspberry Pi and whether responses are being sent.
+
+By systematically following these steps, you should be able to identify and resolve the issue preventing your local PC from pinging devices in the Remote site network.
+
 ## Security Recommendations
 Use Strong Authentication: Ensure strong, unique private and public keys for authentication.
 Regularly Update Software: Keep WireGuard and all related software up to date.
@@ -156,4 +259,6 @@ Proper Firewall Configuration: Use iptables or ufw to manage firewall rules on t
 Monitor and Review Logs: Regularly monitor VPN server logs for unusual activity.
 Restrict Access: Limit VPN server access to trusted IP addresses if possible.
 By following these steps and recommendations, you ensure a secure and reliable VPN connection between your local network and the Northern site.
+
+
 
