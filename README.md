@@ -154,9 +154,18 @@ Press Y to save the changes.
 Press Enter to confirm the file name.
 
 ## :heavy_check_mark: Router configurations
-### 1. Static route on the local router
+### 1. Static route and Port forwarding on the local router
+Static route to route all 192.168.1.0 through the WireGuard gateway. Please ensure WireGuard server IP persistence.
+```
+   Network Address:      192.168.1.0
+   Subnet Mask:          255.255.255.0
+   Gateway:              192.168.0.xxx
+   Interface:            LAN
+```
 
-### 2. route all traffic from the remote site through the Raspberry Pi VPN (Optional)
+Port forwarding 51820 to the WireGuard server. This setup only require 1 port.
+			
+### 2. Route all traffic from the remote site through the Raspberry Pi VPN (Optional)
 To route all traffic from the remote site through the Raspberry Pi VPN to your local network, you'll need to configure both the router at the northern site and the Raspberry Pi acting as the VPN gateway.
 
 1. Set the default gateway on the remote site router to point to the Raspberry Pi VPN IP address. This will route all outgoing traffic through the VPN tunnel.
