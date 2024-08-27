@@ -265,7 +265,7 @@ sudo nmap -sP 192.168.1.0/24
 ```
 Schedule Scans and Logging
 ```
-crontab -e
+sudo crontab -e
 ```
 Add a line like this to run the scan every hour:
 ```
