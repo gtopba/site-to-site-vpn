@@ -1,4 +1,10 @@
 ## :heavy_check_mark: Key Characteristics of Site-to-Site VPN:
+### Updated from last post:
+
+1. Using cheaper board like Orange Pi Zero 3.
+2. Using a more modern firewall rules "nstables" instead of "iptables" for better performance.
+3. Running on lightweight OS "Armbian Debian 12 minimal image".
+
 ### Connects Two Networks:
 
 A Site-to-Site VPN connects entire networks (e.g., your local home network and the Northern site network), allowing devices on one network to communicate with devices on the other as if they were on the same local network.
@@ -28,12 +34,13 @@ Devices on each network do not need to be aware of the VPN; they simply send tra
    
 ### remote site
 1. OrangePi zero 3 running 64bit Armbian Debian 12 minimal image [install](https://www.armbian.com/orange-pi-zero-3/)
-2. Router 192.168.2.1
+2. Using [BalenaEtcher](https://etcher.balena.io/) to prepare bootable SD card.
+3. Router 192.168.2.1
    
 ## :lollipop: WireGuard VPN Setup and Maintenance
-This document provides a step-by-step guide to setting up and maintaining a WireGuard VPN connection between a local network and a remote site using a Raspberry Pi with PiOS lite 64bit.
+This document provides a step-by-step guide to setting up and maintaining a WireGuard VPN connection between a local network and a remote site using a Orange Pi with Armbian Debian 12.
 
-### 1. Install WireGuard on Raspberry Pi
+### 1. Install WireGuard on Orange Pi
 Update your package list:
 ```
 sudo apt-get update
@@ -53,7 +60,7 @@ pivpn add
 ```
 Copy the generated client file to client device
 
-### 3. Set Up the WireGuard Client Configuration File on Raspberry Pi
+### 3. Set Up the WireGuard Client Configuration File on Orange Pi
 Create the configuration file:
 ```
 sudo nano /etc/wireguard/wg0.conf
@@ -62,13 +69,13 @@ Add the following configuration to the file:
 ```
 [Interface]
 PrivateKey = <client_private_key>
-Address = 10.63.31.2/24
+Address = 10.63.31.5/24
 DNS = 8.8.8.8
 
 [Peer]
 PublicKey = <server_public_key>
 PresharedKey = <preshared_key>
-Endpoint = warut.duckdns.org:51820
+Endpoint = <ddns_url>:51820
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 ```
