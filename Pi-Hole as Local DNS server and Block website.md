@@ -9,16 +9,15 @@ curl -sSL https://install.pi-hole.net | bash
 1. Log in to your router's admin interface.
 
 2. Navigate to the DNS settings:
-  - Look for settings related to DNS, usually under Network, LAN, or DHCP.
+    - Look for settings related to DNS, usually under Network, LAN, or DHCP.
     
 3. Set the Pi-hole IP address as the primary DNS server:
-  - Replace the existing DNS server with the IP address of your Orange Pi (e.g., 192.168.2.x).
-  - Save the changes.
+    - Replace the existing DNS server with the IP address of your Orange Pi (e.g., 192.168.2.x).
+    - Save the changes.
 
 4. Optional - Disable IPv6 DNS (if not using IPv6):
-  -
   - If your network doesn’t support IPv6 or you didn’t enable IPv6 during the Pi-hole installation, make sure your router is not assigning IPv6 DNS servers.
-  - 
+
 ## 3. Local DNS server
   - Local DNS Resolver: You might have a DNS resolver like Unbound installed on the same machine as Pi-hole. This resolver is configured to provide recursive DNS queries, which Pi-hole uses to resolve domain names. The resolver is set up to listen on 127.0.0.1 (the loopback interface) and on port 5335.
   - Flexibility: This setup allows you to implement advanced DNS features such as DNSSEC validation, filtering, and more complex DNS resolution strategies.
