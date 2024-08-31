@@ -179,7 +179,10 @@ sudo crontab -e
 Add the following line to run every 5 minutes:
 ```
 */5 * * * * /usr/local/bin/check_wireguard.sh
+0 3 * * * /sbin/shutdown -r now
 ```
+And also reboot the system everyday at 3 a.m.
+
 Save and exit:
 Press Ctrl+X to exit.
 Press Y to save the changes.
