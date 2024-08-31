@@ -22,12 +22,6 @@ network:
         addresses:
           - 192.168.2.206
           - 8.8.8.8
-    all-eth-interfaces:
-      match:
-        name: "e*"
-      dhcp4: yes
-      dhcp6: yes
-      ipv6-privacy: yes
 ```
 ```
 sudo netplan apply
