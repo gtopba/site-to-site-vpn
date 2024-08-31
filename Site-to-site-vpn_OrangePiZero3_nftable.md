@@ -89,24 +89,49 @@ Enable IP forwarding:
 echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
-Set up iptables rules:
+Set up nftables rules:
 ```
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-sudo iptables -A FORWARD -i wg0 -j ACCEPT
-sudo iptables -A FORWARD -o wg0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+sudo apt-get install nftables
 ```
-Make iptables rules persistent:
 ```
-sudo apt-get install iptables-persistent
-sudo sh -c "iptables-save > /etc/iptables/rules.v4"
+sudo nano /etc/nftables.conf
 ```
-Edit the rc.local file to load the iptables rule on boot:
+Add the following rules:
 ```
-sudo nano /etc/rc.local
+flush ruleset
+
+table inet my_table {
+    chain input {
+        type filter hook input priority 0; policy accept;
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+        ct state related,established accept
+        iifname "wg0" accept
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+
+    chain prerouting {
+        type nat hook prerouting priority -100; policy accept;
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        oifname "end0" masquerade
+    }
+}
 ```
-Add the following line before exit 0:
+Enable nftables to load on boot:
 ```
-iptables-restore < /etc/iptables.ipv4.nat
+sudo systemctl enable nftables
+```
+Start nftables:
+```
+sudo systemctl start nftables
 ```
 
 ### 5. Start and Enable WireGuard
@@ -164,7 +189,7 @@ Press Enter to confirm the file name.
 ### 1. Static route and Port forwarding on the local router
 Static route to route all 192.168.1.0 through the WireGuard gateway. Please ensure WireGuard server IP persistence.
 ```
-   Network Address:      192.168.1.0
+   Network Address:      192.168.2.0
    Subnet Mask:          255.255.255.0
    Gateway:              192.168.0.xxx
    Interface:            LAN
@@ -172,12 +197,12 @@ Static route to route all 192.168.1.0 through the WireGuard gateway. Please ensu
 
 Port forwarding 51820 to the WireGuard server. This setup only require 1 port.
 			
-### 2. Route all traffic from the remote site through the Raspberry Pi VPN (Optional)
-To route all traffic from the remote site through the Raspberry Pi VPN to your local network, you'll need to configure both the router at the northern site and the Raspberry Pi acting as the VPN gateway.
+### 2. Route all traffic from the remote site through the Orange Pi VPN (Optional)
+To route all traffic from the remote site through the Orange Pi VPN to your local network, you'll need to configure both the router at the northern site and the Orange Pi acting as the VPN gateway.
 
-1. Set the default gateway on the remote site router to point to the Raspberry Pi VPN IP address. This will route all outgoing traffic through the VPN tunnel.
+1. Set the default gateway on the remote site router to point to the Orange Pi VPN IP address. This will route all outgoing traffic through the VPN tunnel.
    - Find the option to set the default gateway or static route.
-   - Set the default gateway to the VPN IP address of the Raspberry Pi.
+   - Set the default gateway to the VPN IP address of the Orange Pi.
   
 2. Ensure that the DNS settings on the remote site router point to your local network's DNS server or another DNS server accessible through the VPN.
 
@@ -192,7 +217,7 @@ To route all traffic from the remote site through the Raspberry Pi VPN to your l
 ``` 
 sudo nano /etc/wireguard/wg0.conf
 ```
-Ensure the file has the correct settings. Noted that 192.168.1.0/12 is the network of my remote site.
+Ensure the file has the correct settings. Noted that 192.168.2.0/24 is the network of my remote site.
 ```
 [Interface]
 PrivateKey = <server_private_key>
@@ -206,7 +231,7 @@ PresharedKey = <preshared_key>
 AllowedIPs = 10.63.31.2/32, 192.168.1.0/24
 PersistentKeepalive = 25
 ```
-### 2. Check the Client Configuration File on Raspberry Pi
+### 2. Check the Client Configuration File on Orange Pi
 ```
 sudo nano /etc/wireguard/wg0.conf
 ```
@@ -229,11 +254,9 @@ Ensure the output is net.ipv4.ip_forward = 1. If not, enable it:
 sudo sysctl net.ipv4.ip_forward
 ```
 #### Check iptables Rules:
-Ensure you have the correct iptables rules set for NAT and forwarding:
+Ensure you have the correct nftables rules set for NAT and forwarding:
 ```
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-sudo iptables -A FORWARD -i wg0 -j ACCEPT
-sudo iptables -A FORWARD -o wg0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+sudo nft list ruleset
 ```
 ### 4. Verify Routing
 On the WireGuard Server:
@@ -243,20 +266,20 @@ ip route
 You should see routes for:
 
 VPN network (10.63.31.0/24)
-Remote site network (192.168.1.0/24)
+Remote site network (192.168.2.0/24)
 Local network (192.168.0.0/24)
 
 ### 5. Test Network Connectivity
 From Local PC:
 1. Ping the Remote site router:
 ```
-ping 192.168.1.1
+ping 192.168.2.1
 ```
-2. Ping the Remote site Raspberry Pi: 
+2. Ping the Remote site Orange Pi: 
 ```
-ping 192.168.1.100
+ping 192.168.2.100
 ```
-From the Raspberry Pi at the Remote Site:
+From the Orange Pi at the Remote Site:
 1. Ping the local site router:
 ```
 ping 192.168.0.1
@@ -268,7 +291,7 @@ sudo apt install nmap
 ```
 Scan the Network
 ```
-sudo nmap -sP 192.168.1.0/24
+sudo nmap -sP 192.168.2.0/24
 ```
 Schedule Scans and Logging
 ```
@@ -276,13 +299,13 @@ sudo crontab -e
 ```
 Add a line like this to run the scan every hour:
 ```
-0 * * * * echo "---- Scan on $(date) ----" >> /home/<user>/network_scan.log && sudo nmap -sP 192.168.1.0/24 >> /home/<user>/network_scan.log
+0 * * * * echo "---- Scan on $(date) ----" >> /home/<user>/network_scan.log && sudo nmap -sP 192.168.2.0/24 >> /home/<user>/network_scan.log
 
 ```
 Accessing the Log:
 
 ```
-cat /home/pi/network_scan.log
+cat /home/<user>/network_scan.log
 
 ```
 ### 7. Scan open ports
@@ -301,16 +324,16 @@ sudo nmap -A TARGET_IP
 
 ### 8. Check Firewall Rules
 Ensure there are no firewall rules blocking the traffic.
-On the Raspberry Pi:
+On the Orange Pi:
 ```
-sudo iptables -L -v
+sudo nft list ruleset
 ```
 Ensure there are no rules blocking traffic between the VPN and the Northern site network.
 
 ### 9. Capture and Analyze Network Traffic
 If the above steps do not resolve the issue, use tcpdump or Wireshark to capture and analyze the network traffic.
 
-On the Raspberry Pi at the Remote Site:
+On the Orange Pi at the Remote Site:
 1. Install tcpdump (if not already installed):
 ```
 sudo apt-get install tcpdump
@@ -323,7 +346,24 @@ sudo tcpdump -i wg0
 ```
 sudo tcpdump -i eth0
 ```
-Analyze the traffic to see if ping requests are reaching the Raspberry Pi and whether responses are being sent.
+Analyze the traffic to see if ping requests are reaching the Orange Pi and whether responses are being sent.
+
+### 10. Iperf3 Speedtest.
+```
+sudo apt-get install iperf3
+```
+Start iperf3 in server mode on your Orange Pi:
+```
+iperf3 -s
+```
+Run the iperf Client on Your Local Machine:
+```
+iperf3 -c [Opi_IP_Address]
+```
+Run iperf3 with the reverse flag (-R) to measure the speed from the Opi to your local machine::
+```
+iperf3 -c [Opi_IP_Address] -R
+```
 
 By systematically following these steps, you should be able to identify and resolve the issue preventing your local PC from pinging devices in the Remote site network.
 
