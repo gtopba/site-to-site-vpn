@@ -364,6 +364,7 @@ Run iperf3 with the reverse flag (-R) to measure the speed from the Opi to your 
 ```
 iperf3 -c [Opi_IP_Address] -R
 ```
+My results was avg 120 Mbits/s both send and receive.
 
 By systematically following these steps, you should be able to identify and resolve the issue preventing your local PC from pinging devices in the Remote site network.
 
