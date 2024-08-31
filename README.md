@@ -68,7 +68,7 @@ DNS = 8.8.8.8
 [Peer]
 PublicKey = <server_public_key>
 PresharedKey = <preshared_key>
-Endpoint = warut.duckdns.org:51820
+Endpoint = <ddns_url>:51820
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
 ```
