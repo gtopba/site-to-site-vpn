@@ -33,3 +33,22 @@ ip a show end0
 ```
 In this case, the pi-hole dhcp rang should be `192.168.2.2` to `192. 168.2.205` to prevent ip conflic 
 
+This is the original config:
+```
+# Added by Armbian
+#
+# Reference: https://netplan.readthedocs.io/en/stable/netplan-yaml/
+#
+# Let systemd-networkd manage all Ethernet devices on this system, but be configured by Netplan.
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    all-eth-interfaces:
+      match:
+        name: "e*"
+      dhcp4: yes
+      dhcp6: yes
+      ipv6-privacy: yes # Enabled by default on most current systems, but networkd currently doesn't enable IPv6 privacy by default, see https://man.archlinux.org/man/systemd.network.5
+```
