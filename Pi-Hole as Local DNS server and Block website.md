@@ -74,3 +74,4 @@ network:
       dhcp6: yes
       ipv6-privacy: yes # Enabled by default on most current systems, but networkd currently doesn't enable IPv6 privacy by default, see https://man.archlinux.org/man/systemd.network.5
 ```
+Static IP and DHCP Server is not necessary if only DNS and adblock are used. 
