@@ -366,6 +366,23 @@ iperf3 -c [Opi_IP_Address] -R
 ```
 My results was avg 120 Mbits/s both send and receive.
 
+### 11. Check LAN port connection speed.
+```
+sudo apt-get install ethtool
+```
+```
+sudo ethtool end0
+```
+```
+sudo apt-get remove --purge ethtool
+```
+```
+sudo apt-get autoremove --purge
+```
+```
+sudo apt-get clean
+```
+
 By systematically following these steps, you should be able to identify and resolve the issue preventing your local PC from pinging devices in the Remote site network.
 
 ## :heavy_check_mark: Security Recommendations
