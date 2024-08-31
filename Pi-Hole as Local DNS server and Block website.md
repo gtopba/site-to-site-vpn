@@ -31,4 +31,5 @@ sudo netplan apply
 ```
 ip a show end0
 ```
+In this case, the pi-hole dhcp rang should be `192.168.2.2` to `192. 168.2.205` to prevent ip conflic 
 
