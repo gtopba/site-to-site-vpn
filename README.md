@@ -28,7 +28,7 @@ Devices on each network do not need to be aware of the VPN; they simply send tra
    
 ### remote site
 1. Rpi 3 B+ running 64bit PiOS lite [install](https://www.tomshardware.com/reviews/raspberry-pi-headless-setup-how-to,6028.html)
-2. Router 192.168.2.1
+2. Router 192.168.1.1
    
 ## :lollipop: WireGuard VPN Setup and Maintenance
 This document provides a step-by-step guide to setting up and maintaining a WireGuard VPN connection between a local network and a remote site using a Raspberry Pi with PiOS lite 64bit.
